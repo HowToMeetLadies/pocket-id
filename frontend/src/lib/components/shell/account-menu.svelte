@@ -7,6 +7,7 @@
 	import userStore from '#lib/stores/user-store.ts';
 	import { cachedProfilePicture } from '#lib/utils/cached-asset-util.ts';
 	import { setModeInstantly } from '#lib/utils/color-theme-util.ts';
+	import { hasOpenDialog, isEditableTarget, isModKey } from '#lib/utils/keyboard-util.ts';
 	import { signOut } from '#lib/utils/sign-out-util.ts';
 	import { cn } from '@pocket-id/ui/utils';
 	import IdCard from '~icons/solar/user-id-bold';
@@ -25,9 +26,22 @@
 
 	let open = $state(false);
 	let jumping = $state(false);
+	let triggerEl = $state<HTMLButtonElement>();
 
 	const appearanceLabels = { light: m.light(), dark: m.dark(), system: m.system() };
+
+	function handleAccountShortcut(event: KeyboardEvent) {
+		if (!isModKey(event) || event.altKey || event.shiftKey || event.repeat) return;
+		if (event.key.toLowerCase() !== 'a') return;
+		if (!triggerEl?.getClientRects().length) return;
+		if (isEditableTarget(event.target) || hasOpenDialog()) return;
+
+		event.preventDefault();
+		open = !open;
+	}
 </script>
+
+<svelte:window onkeydown={handleAccountShortcut} />
 
 {#snippet appearanceOptions()}
 	<DropdownMenu.RadioGroup
@@ -54,6 +68,7 @@
 						{#snippet child({ props })}
 							<button
 								{...props}
+								bind:this={triggerEl}
 								type="button"
 								aria-label={variant === 'row' ? undefined : m.account_menu()}
 								class={cn(
