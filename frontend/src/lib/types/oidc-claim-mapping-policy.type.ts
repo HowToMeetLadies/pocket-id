@@ -48,6 +48,8 @@ export type OidcClaimMappingDto = {
 	claimName: string;
 	sourceType: OidcClaimMappingPolicySourceType;
 	sourceValue: string;
+	// Only used for custom claim mappings, empty means the claim is omitted when the person has no such custom claim
+	defaultValue: string;
 	scope: OidcScope[];
 	accessToken: boolean;
 	idToken: boolean;

@@ -362,13 +362,14 @@ func ClaimMappingsFromDto(dtos []OidcClaimMappingDto) OidcClaimMappings {
 	mappings := make(OidcClaimMappings, len(dtos))
 	for i, mapping := range dtos {
 		mappings[i] = OidcClaimMapping{
-			ClaimName:   mapping.ClaimName,
-			SourceType:  OidcClaimMappingSourceType(mapping.SourceType),
-			SourceValue: mapping.SourceValue,
-			Scope:       mapping.Scope,
-			AccessToken: mapping.AccessToken,
-			IDToken:     mapping.IDToken,
-			UserInfo:    mapping.UserInfo,
+			ClaimName:    mapping.ClaimName,
+			SourceType:   OidcClaimMappingSourceType(mapping.SourceType),
+			SourceValue:  mapping.SourceValue,
+			DefaultValue: mapping.DefaultValue,
+			Scope:        mapping.Scope,
+			AccessToken:  mapping.AccessToken,
+			IDToken:      mapping.IDToken,
+			UserInfo:     mapping.UserInfo,
 		}
 	}
 	return mappings
@@ -430,6 +431,14 @@ func ValidateClaimMappings(mappings []OidcClaimMappingDto) error {
 
 		if mapping.SourceType == string(MappingSourceUserField) && !isValidUserFieldSource(mapping.SourceValue) {
 			return apperror.ValidationMessage("invalid user field '" + mapping.SourceValue + "' for mapping")
+		}
+
+		if mapping.DefaultValue != "" && mapping.SourceType != string(MappingSourceCustomClaim) {
+			return apperror.ValidationMessage("claim mapping for '" + mapping.ClaimName + "' can only set a default value for a custom claim")
+		}
+
+		if mapping.DefaultValue != "" && mapping.SourceValue == "*" {
+			return apperror.ValidationMessage("claim mapping for '" + mapping.ClaimName + "' can't set a default value when it passes every custom claim")
 		}
 
 		if !mapping.AccessToken && !mapping.IDToken && !mapping.UserInfo {

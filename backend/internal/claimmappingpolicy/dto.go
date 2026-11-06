@@ -20,11 +20,13 @@ type OidcClaimMappingPolicyDto struct {
 }
 
 type OidcClaimMappingDto struct {
-	ClaimName   string   `json:"claimName" binding:"required,max=255"`
-	SourceType  string   `json:"sourceType" binding:"required,oneof=user_field custom_claim static"`
-	SourceValue string   `json:"sourceValue" binding:"required,max=255"`
-	Scope       []string `json:"scope" binding:"min=1,dive,oneof=openid profile email offline_access groups"`
-	AccessToken bool     `json:"accessToken"`
-	IDToken     bool     `json:"idToken"`
-	UserInfo    bool     `json:"userInfo"`
+	ClaimName   string `json:"claimName" binding:"required,max=255"`
+	SourceType  string `json:"sourceType" binding:"required,oneof=user_field custom_claim static"`
+	SourceValue string `json:"sourceValue" binding:"required,max=255"`
+	// DefaultValue is only used by custom claim mappings
+	DefaultValue string   `json:"defaultValue" binding:"max=255"`
+	Scope        []string `json:"scope" binding:"min=1,dive,oneof=openid profile email offline_access groups"`
+	AccessToken  bool     `json:"accessToken"`
+	IDToken      bool     `json:"idToken"`
+	UserInfo     bool     `json:"userInfo"`
 }
