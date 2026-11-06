@@ -76,13 +76,28 @@ type userClaimsSource struct {
 
 // loadUserClaimsSource reads the user with its groups, the claim mapping policy of the client and, when the policy needs them, the custom claims of the user
 func (s *ClaimsService) loadUserClaimsSource(ctx context.Context, userID string, clientID string) (*userClaimsSource, error) {
-	return s.loadClaimsSource(ctx, userID, func(ctx context.Context) (*claimmappingpolicy.OidcClaimMappingPolicy, error) {
+	return s.loadUserClaimsSourceWithGroupOrder(ctx, userID, clientID, nil)
+}
+
+// loadUserClaimsSourceWithGroupOrder is loadUserClaimsSource with the custom-claim tie-break already resolved by the caller
+// A caller that already holds a transaction must pass it here, because reading the config actor from inside that transaction would open a second SQLite transaction and can fail with SQLITE_BUSY
+func (s *ClaimsService) loadUserClaimsSourceWithGroupOrder(ctx context.Context, userID string, clientID string, groupOrder *string) (*userClaimsSource, error) {
+	return s.loadClaimsSource(ctx, userID, groupOrder, func(ctx context.Context) (*claimmappingpolicy.OidcClaimMappingPolicy, error) {
 		return s.GetClaimMappingPolicyByClientID(ctx, clientID)
 	})
 }
 
-// loadClaimsSource is loadUserClaimsSource with the policy coming from loadPolicy, which runs inside the same transaction
-func (s *ClaimsService) loadClaimsSource(ctx context.Context, userID string, loadPolicy func(ctx context.Context) (*claimmappingpolicy.OidcClaimMappingPolicy, error)) (*userClaimsSource, error) {
+// loadClaimsSource is loadUserClaimsSource with the policy coming from loadPolicy
+// The group order is resolved before the transaction so the config actor cannot open a second one
+func (s *ClaimsService) loadClaimsSource(ctx context.Context, userID string, groupOrder *string, loadPolicy func(ctx context.Context) (*claimmappingpolicy.OidcClaimMappingPolicy, error)) (*userClaimsSource, error) {
+	if s.customClaims != nil && groupOrder == nil {
+		order, err := s.customClaimGroupOrder(ctx)
+		if err != nil {
+			return nil, err
+		}
+		groupOrder = &order
+	}
+
 	var src userClaimsSource
 	err := withTx(ctx, s.db, func(ctx context.Context) error {
 		db := dbFromContext(ctx, s.db)
@@ -110,7 +125,7 @@ func (s *ClaimsService) loadClaimsSource(ctx context.Context, userID string, loa
 			return nil
 		}
 
-		src.customClaims, err = s.customClaims.GetCustomClaimsForUserWithUserGroups(ctx, src.user.ID, db)
+		src.customClaims, err = s.customClaims.GetCustomClaimsForUserWithUserGroupsWithOrder(ctx, src.user.ID, db, *groupOrder)
 		return err
 	})
 	if err != nil {
@@ -118,6 +133,23 @@ func (s *ClaimsService) loadClaimsSource(ctx context.Context, userID string, loa
 	}
 
 	return &src, nil
+}
+
+// customClaimGroupOrder returns the configured tie-break for groups with equal claim priority
+func (s *ClaimsService) customClaimGroupOrder(ctx context.Context) (string, error) {
+	if s.appConfig == nil {
+		return string(appconfig.CustomClaimGroupOrderNewest), nil
+	}
+
+	cfg, err := s.appConfig.GetConfig(ctx)
+	if err != nil {
+		return "", err
+	}
+	if cfg.CustomClaimGroupOrder == "" {
+		return string(appconfig.CustomClaimGroupOrderNewest), nil
+	}
+
+	return string(cfg.CustomClaimGroupOrder), nil
 }
 
 func policyHasCustomClaimMapping(policy claimmappingpolicy.OidcClaimMappingPolicy) bool {
@@ -170,7 +202,7 @@ type ClaimMappingsPreview struct {
 // PreviewClaimMappings builds the claims that mappings release for a user and set of scopes, so a policy can be checked before it is saved
 // Only the mapped claims are returned: the ones Pocket ID sets itself depend on the client and the session
 func (s *ClaimsService) PreviewClaimMappings(ctx context.Context, userID string, scopes []string, mappings claimmappingpolicy.OidcClaimMappings) (*ClaimMappingsPreview, error) {
-	src, err := s.loadClaimsSource(ctx, userID, func(context.Context) (*claimmappingpolicy.OidcClaimMappingPolicy, error) {
+	src, err := s.loadClaimsSource(ctx, userID, nil, func(context.Context) (*claimmappingpolicy.OidcClaimMappingPolicy, error) {
 		return &claimmappingpolicy.OidcClaimMappingPolicy{ClaimMappings: mappings}, nil
 	})
 	if errors.Is(err, errClaimsUserNotFound) {

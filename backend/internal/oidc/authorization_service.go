@@ -188,6 +188,16 @@ func (s *authorizationService) authorize(ctx context.Context, input authorizeInp
 
 	codeChallenge := input.requester.GetRequestForm().Get("code_challenge")
 
+	// Resolve the custom-claim group order before starting the transaction, because the config actor opens its own transaction and SQLite rejects a second one while this one holds the write lock
+	var groupOrder *string
+	if s.claimsService.customClaims != nil {
+		order, err := s.claimsService.customClaimGroupOrder(ctx)
+		if err != nil {
+			return authorizationResult{}, err
+		}
+		groupOrder = &order
+	}
+
 	var result authorizationResult
 	err = withTx(ctx, s.db, func(ctx context.Context) error {
 		var txErr error
@@ -207,7 +217,7 @@ func (s *authorizationService) authorize(ctx context.Context, input authorizeInp
 		}
 
 		// Build the token claims inside the transaction so they see the same data as the grant
-		claimsSource, txErr := s.claimsService.loadUserClaimsSource(ctx, result.Session.Subject, client.GetID())
+		claimsSource, txErr := s.claimsService.loadUserClaimsSourceWithGroupOrder(ctx, result.Session.Subject, client.GetID(), groupOrder)
 		if txErr != nil {
 			return txErr
 		}

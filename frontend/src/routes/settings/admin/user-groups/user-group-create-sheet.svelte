@@ -21,7 +21,11 @@
 	// The claim name follows the friendly name until it is edited by hand
 	let nameEdited = false;
 
-	const formStore = createForm(groupNameSchema, { friendlyName: '', name: '' });
+	const formStore = createForm(groupNameSchema, {
+		friendlyName: '',
+		name: '',
+		claimPriority: 0
+	});
 	const { inputs } = formStore;
 
 	$effect(() => {
@@ -70,6 +74,12 @@
 				inputClass="font-mono"
 				bind:input={$inputs.name}
 				onInput={() => (nameEdited = true)}
+			/>
+			<FormInput
+				label={m.claim_priority()}
+				description={m.claim_priority_description()}
+				type="number"
+				bind:input={$inputs.claimPriority}
 			/>
 		</form>
 		{#snippet footer()}
