@@ -14,6 +14,7 @@
 	import { cachedProfilePicture } from '#lib/utils/cached-asset-util.ts';
 	import { encodeClientIdParam } from '#lib/utils/client-id-util.ts';
 	import { setModeInstantly } from '#lib/utils/color-theme-util.ts';
+	import { isModKey } from '#lib/utils/keyboard-util.ts';
 	import { signOut } from '#lib/utils/sign-out-util.ts';
 	import ArrowUpRight from '~icons/solar/arrow-right-up-linear';
 	import LogOut from '~icons/solar/logout-2-bold';
@@ -346,7 +347,7 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
+		if (e.key.toLowerCase() === 'k' && isModKey(e)) {
 			e.preventDefault();
 			commandPalette.open = !commandPalette.open;
 		}
