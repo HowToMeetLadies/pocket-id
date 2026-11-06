@@ -327,6 +327,30 @@ func TestClaimsServicePreviewClaimMappingsIgnoresTheDefaultPolicy(t *testing.T) 
 	require.ErrorContains(t, err, "User")
 }
 
+func TestClaimsServiceCustomClaimDefaultValue(t *testing.T) {
+	db := testutils.NewDatabaseForTest(t)
+	require.NoError(t, claimmappingpolicy.Bootstrap(t.Context(), db))
+	require.NoError(t, db.Create(&model.User{Base: model.Base{ID: "user-1"}, Username: "tim", Email: stringPointer("tim@example.com")}).Error)
+
+	customClaims := fakeCustomClaimSource{claims: []model.CustomClaim{{Key: "department", Value: "engineering"}}}
+	service := newClaimsService(db, customClaims, "", nil, appconfig.StaticResolver{})
+
+	preview, err := service.PreviewClaimMappings(t.Context(), "user-1", []string{"openid", "email"}, claimmappingpolicy.OidcClaimMappings{
+		{ClaimName: "dept", SourceType: claimmappingpolicy.MappingSourceCustomClaim, SourceValue: "department", DefaultValue: "unassigned", Scope: []string{"email"}, IDToken: true},
+		{ClaimName: "team", SourceType: claimmappingpolicy.MappingSourceCustomClaim, SourceValue: "team", DefaultValue: "unknown", Scope: []string{"email"}, IDToken: true},
+		{ClaimName: "tier", SourceType: claimmappingpolicy.MappingSourceCustomClaim, SourceValue: "tier", DefaultValue: "42", Scope: []string{"email"}, IDToken: true},
+		{ClaimName: "org", SourceType: claimmappingpolicy.MappingSourceCustomClaim, SourceValue: "org", Scope: []string{"email"}, IDToken: true},
+		{ClaimName: "*", SourceType: claimmappingpolicy.MappingSourceCustomClaim, SourceValue: "*", DefaultValue: "fallback", Scope: []string{"email"}, IDToken: true},
+	})
+	require.NoError(t, err)
+	require.Equal(t, map[string]any{
+		"dept":       "engineering",
+		"team":       "unknown",
+		"tier":       int64(42),
+		"department": "engineering",
+	}, preview.IDToken)
+}
+
 func TestClaimsServiceOmitsEmailClaimsForEmptyEmail(t *testing.T) {
 	db := testutils.NewDatabaseForTest(t)
 	require.NoError(t, claimmappingpolicy.Bootstrap(t.Context(), db))

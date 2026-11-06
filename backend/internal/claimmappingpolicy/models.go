@@ -43,10 +43,12 @@ type OidcClaimMapping struct {
 	ClaimName   string                     `json:"claimName"`
 	SourceType  OidcClaimMappingSourceType `json:"sourceType"`
 	SourceValue string                     `json:"sourceValue"`
-	Scope       datatype.StringList        `json:"scope"`
-	AccessToken bool                       `json:"accessToken"`
-	IDToken     bool                       `json:"idToken"`
-	UserInfo    bool                       `json:"userInfo"`
+	// DefaultValue applies when the custom claim source has no value, an empty default leaves the claim out
+	DefaultValue string              `json:"defaultValue"`
+	Scope        datatype.StringList `json:"scope"`
+	AccessToken  bool                `json:"accessToken"`
+	IDToken      bool                `json:"idToken"`
+	UserInfo     bool                `json:"userInfo"`
 }
 
 type OidcClaimMappingSourceType string

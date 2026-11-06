@@ -54,6 +54,7 @@
 	let customKey = $state({ value: '', error: null as string | null });
 	let allCustom = $state(false);
 	let staticValue = $state({ value: '', error: null as string | null });
+	let defaultValue = $state({ value: '', error: null as string | null });
 	let scopes = $state<OidcScope[]>([]);
 	let tokens = $state({ idToken: false, accessToken: false, userInfo: false });
 	let scopesError = $state<string | null>(null);
@@ -68,6 +69,7 @@
 				claimName: '',
 				sourceType: 'user_field',
 				sourceValue: 'email',
+				defaultValue: '',
 				scope: ['profile'],
 				idToken: true,
 				accessToken: false,
@@ -83,6 +85,7 @@
 			};
 			allCustom = wildcard;
 			staticValue = { value: base.sourceType === 'static' ? base.sourceValue : '', error: null };
+			defaultValue = { value: base.defaultValue ?? '', error: null };
 			scopes = [...base.scope];
 			tokens = { idToken: base.idToken, accessToken: base.accessToken, userInfo: base.userInfo };
 			scopesError = null;
@@ -133,6 +136,7 @@
 			claimName: wildcard ? '*' : name,
 			sourceType,
 			sourceValue,
+			defaultValue: sourceType === 'custom_claim' && !allCustom ? defaultValue.value.trim() : '',
 			scope: MAPPING_SCOPES.filter((s) => scopes.includes(s)),
 			...tokens
 		});
@@ -205,6 +209,16 @@
 								}
 							/>
 						</FormInput>
+					{/if}
+					{#if !allCustom}
+						<FormInput
+							label={m.default_value()}
+							description={m.default_value_helper()}
+							placeholder="unassigned"
+							autocomplete="off"
+							optional
+							bind:input={defaultValue}
+						/>
 					{/if}
 					<label class="flex items-start gap-3">
 						<Checkbox
