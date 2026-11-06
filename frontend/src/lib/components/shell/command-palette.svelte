@@ -361,11 +361,12 @@
 <svelte:window onkeydown={onKeydown} />
 
 <Dialog.Root bind:open={commandPalette.open}>
+	<!-- A backdrop filter over this scrolling list halves the frame rate, so the palette uses a near-opaque surface instead -->
 	<Dialog.Content
 		showCloseButton={false}
 		overlayClass={jumping ? 'data-closed:duration-0' : undefined}
 		class={[
-			'bg-surface-raised/72 border-fg/6 dark:border-fg/10 [@media(prefers-reduced-transparency:reduce)]:bg-surface-raised! top-[15%] flex h-[min(70dvh,600px)] max-w-(--palette-w) translate-y-0 flex-col gap-0 overflow-hidden rounded-lg p-0 backdrop-blur-[40px] backdrop-saturate-150 max-sm:inset-0 max-sm:h-dvh max-sm:max-h-none max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:rounded-none max-sm:border-0 max-sm:pb-[env(safe-area-inset-bottom)] max-sm:before:hidden [@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none!',
+			'bg-surface-raised/95 border-fg/6 dark:border-fg/10 [@media(prefers-reduced-transparency:reduce)]:bg-surface-raised! top-[15%] flex h-[min(70dvh,600px)] max-w-(--palette-w) translate-y-0 flex-col gap-0 overflow-hidden rounded-lg p-0 max-sm:inset-0 max-sm:h-dvh max-sm:max-h-none max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:rounded-none max-sm:border-0 max-sm:pb-[env(safe-area-inset-bottom)] max-sm:before:hidden',
 			jumping && 'data-closed:duration-0'
 		]}
 	>
