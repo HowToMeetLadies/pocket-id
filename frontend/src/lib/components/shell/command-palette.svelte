@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import OidcClientAvatar from '#lib/components/oidc-client-avatar.svelte';
 	import * as Avatar from '@pocket-id/ui/avatar';
+	import { Checkbox } from '@pocket-id/ui/checkbox';
 	import * as Command from '@pocket-id/ui/command';
 	import * as Dialog from '@pocket-id/ui/dialog';
 	import { m } from '#lib/paraglide/messages.js';
@@ -71,6 +72,8 @@
 	const apisService = new ApisService();
 
 	let query = $state('');
+	// The debug checkbox restores the original backdrop so both variants can be compared
+	let useOriginalBackdrop = $state(false);
 	// The page crossfade snapshots the old page, so a palette still fading out would show under the new one
 	let jumping = $state(false);
 	const q = $derived(query.trim().toLowerCase());
@@ -361,12 +364,15 @@
 <svelte:window onkeydown={onKeydown} />
 
 <Dialog.Root bind:open={commandPalette.open}>
-	<!-- A backdrop filter over this scrolling list halves the frame rate, so the palette uses a near-opaque surface instead -->
+	<!-- A backdrop filter over this scrolling list halves the frame rate, so the fixed mode uses a near-opaque surface instead -->
 	<Dialog.Content
 		showCloseButton={false}
 		overlayClass={jumping ? 'data-closed:duration-0' : undefined}
 		class={[
-			'bg-surface-raised/95 border-fg/6 dark:border-fg/10 [@media(prefers-reduced-transparency:reduce)]:bg-surface-raised! top-[15%] flex h-[min(70dvh,600px)] max-w-(--palette-w) translate-y-0 flex-col gap-0 overflow-hidden rounded-lg p-0 max-sm:inset-0 max-sm:h-dvh max-sm:max-h-none max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:rounded-none max-sm:border-0 max-sm:pb-[env(safe-area-inset-bottom)] max-sm:before:hidden',
+			'border-fg/6 dark:border-fg/10 [@media(prefers-reduced-transparency:reduce)]:bg-surface-raised! top-[15%] flex h-[min(70dvh,600px)] max-w-(--palette-w) translate-y-0 flex-col gap-0 overflow-hidden rounded-lg p-0 max-sm:inset-0 max-sm:h-dvh max-sm:max-h-none max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:rounded-none max-sm:border-0 max-sm:pb-[env(safe-area-inset-bottom)] max-sm:before:hidden',
+			useOriginalBackdrop
+				? 'bg-surface-raised/72 backdrop-blur-[40px] backdrop-saturate-150'
+				: 'bg-surface-raised/95',
 			jumping && 'data-closed:duration-0'
 		]}
 	>
@@ -435,17 +441,24 @@
 				{/if}
 			</Command.List>
 			<div
-				class="text-caption text-fg-muted flex h-9 shrink-0 items-center gap-4 px-4 shadow-[inset_0_1px_0_var(--border)] max-sm:hidden"
+				class="text-caption text-fg-muted flex h-9 shrink-0 items-center gap-4 px-4 shadow-[inset_0_1px_0_var(--border)] max-sm:h-11"
 			>
-				<span class="flex items-center gap-1.5"
-					><kbd class="keycap">↑</kbd><kbd class="keycap">↓</kbd>{m.palette_hint_navigate()}</span
-				>
-				<span class="flex items-center gap-1.5"
-					><kbd class="keycap">↵</kbd>{m.palette_hint_open()}</span
-				>
-				<span class="flex items-center gap-1.5"
-					><kbd class="keycap">esc</kbd>{m.palette_hint_close()}</span
-				>
+				<div class="flex items-center gap-4 max-sm:hidden">
+					<span class="flex items-center gap-1.5"
+						><kbd class="keycap">↑</kbd><kbd class="keycap">↓</kbd>{m.palette_hint_navigate()}</span
+					>
+					<span class="flex items-center gap-1.5"
+						><kbd class="keycap">↵</kbd>{m.palette_hint_open()}</span
+					>
+					<span class="flex items-center gap-1.5"
+						><kbd class="keycap">esc</kbd>{m.palette_hint_close()}</span
+					>
+				</div>
+				<!-- The debug toggle restores the original blurred backdrop for comparison -->
+				<label class="ml-auto flex cursor-pointer items-center gap-2">
+					<Checkbox bind:checked={useOriginalBackdrop} aria-label="Original backdrop blur" />
+					<span>Original (Blur)</span>
+				</label>
 			</div>
 		</Command.Root>
 	</Dialog.Content>
