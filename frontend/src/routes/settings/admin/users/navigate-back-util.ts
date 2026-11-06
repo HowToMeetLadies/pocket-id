@@ -5,7 +5,8 @@ import unsavedChanges from '#lib/stores/unsaved-changes-store.svelte.ts';
 export const backNavigate = (listRoute: string) => {
 	let previousUrl: URL | undefined;
 	afterNavigate((e) => {
-		if (e.from && !e.shallow) {
+		// SvelteKit's from target can lack a URL during startup, so only remember a usable one
+		if (e.from?.url && !e.shallow) {
 			previousUrl = new URL(e.from.url.href);
 		}
 	});
