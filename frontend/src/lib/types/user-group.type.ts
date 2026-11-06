@@ -6,6 +6,7 @@ export type UserGroup = {
 	id: string;
 	friendlyName: string;
 	name: string;
+	claimPriority: number;
 	createdAt: string;
 	customClaims: CustomClaim[];
 	ldapId?: string;
@@ -17,4 +18,4 @@ export type UserGroupMinimal = Omit<UserGroup, 'users' | 'allowedOidcClients'> &
 	userCount: number;
 };
 
-export type UserGroupCreate = Pick<UserGroup, 'friendlyName' | 'name' | 'ldapId'>;
+export type UserGroupCreate = Pick<UserGroup, 'friendlyName' | 'name' | 'claimPriority' | 'ldapId'>;

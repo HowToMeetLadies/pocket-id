@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
 
+	"github.com/pocket-id/pocket-id/backend/internal/appconfig"
 	"github.com/pocket-id/pocket-id/backend/internal/apperror"
 	"github.com/pocket-id/pocket-id/backend/internal/common"
 	"github.com/pocket-id/pocket-id/backend/internal/dto"
@@ -13,11 +16,12 @@ import (
 )
 
 type CustomClaimService struct {
-	db *gorm.DB
+	db        *gorm.DB
+	appConfig appconfig.AppConfigResolver
 }
 
-func NewCustomClaimService(db *gorm.DB) *CustomClaimService {
-	return &CustomClaimService{db: db}
+func NewCustomClaimService(db *gorm.DB, appConfig appconfig.AppConfigResolver) *CustomClaimService {
+	return &CustomClaimService{db: db, appConfig: appConfig}
 }
 
 // isReservedClaim checks if a claim key is reserved e.g. email, preferred_username
@@ -215,6 +219,7 @@ func (s *CustomClaimService) GetCustomClaimsForUser(ctx context.Context, userID 
 	err := tx.
 		WithContext(ctx).
 		Where("user_id = ?", userID).
+		Order("key ASC").
 		Find(&customClaims).
 		Error
 	return customClaims, err
@@ -239,10 +244,16 @@ func (s *CustomClaimService) GetCustomClaimsForUserWithUserGroups(ctx context.Co
 		return nil, err
 	}
 
-	// Store user's claims in a map to prioritize and prevent duplicates
-	claimsMap := make(map[string]model.CustomClaim)
-	for _, claim := range customClaims {
-		claimsMap[claim.Key] = claim
+	// Load the configured tie-break for groups with equal claim priority
+	order := string(appconfig.CustomClaimGroupOrderNewest)
+	if s.appConfig != nil {
+		cfg, err := s.appConfig.GetConfig(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if cfg.CustomClaimGroupOrder != "" {
+			order = string(cfg.CustomClaimGroupOrder)
+		}
 	}
 
 	// Get all user groups of the user
@@ -257,23 +268,66 @@ func (s *CustomClaimService) GetCustomClaimsForUserWithUserGroups(ctx context.Co
 		return nil, err
 	}
 
-	// Add only non-duplicate custom claims from user groups
+	// Order groups once so the first claim for a key is always the same
+	sort.SliceStable(userGroupsOfUser, func(i, j int) bool {
+		return userGroupComesFirstForClaims(userGroupsOfUser[i], userGroupsOfUser[j], order)
+	})
+
+	// Keep the user's claims first and append only the first group claim for each key
+	finalClaims := make([]model.CustomClaim, 0, len(customClaims))
+	seenKeys := make(map[string]struct{}, len(customClaims))
+	appendClaim := func(claim model.CustomClaim) {
+		if _, exists := seenKeys[claim.Key]; exists {
+			return
+		}
+		seenKeys[claim.Key] = struct{}{}
+		finalClaims = append(finalClaims, claim)
+	}
+	for _, claim := range customClaims {
+		appendClaim(claim)
+	}
 	for _, userGroup := range userGroupsOfUser {
 		for _, groupClaim := range userGroup.CustomClaims {
-			// Only add claim if it does not exist in the user's claims
-			if _, exists := claimsMap[groupClaim.Key]; !exists {
-				claimsMap[groupClaim.Key] = groupClaim
-			}
+			appendClaim(groupClaim)
 		}
 	}
 
-	// Convert the claimsMap back to a slice
-	finalClaims := make([]model.CustomClaim, 0, len(claimsMap))
-	for _, claim := range claimsMap {
-		finalClaims = append(finalClaims, claim)
+	return finalClaims, nil
+}
+
+// userGroupComesFirstForClaims applies claim priority first and then the configured tie-break for equal priorities
+func userGroupComesFirstForClaims(a model.UserGroup, b model.UserGroup, order string) bool {
+	if a.ClaimPriority != b.ClaimPriority {
+		return a.ClaimPriority > b.ClaimPriority
 	}
 
-	return finalClaims, nil
+	switch order {
+	case appconfig.CustomClaimGroupOrderName:
+		aFriendlyName := strings.ToLower(a.FriendlyName)
+		bFriendlyName := strings.ToLower(b.FriendlyName)
+		if aFriendlyName != bFriendlyName {
+			return aFriendlyName < bFriendlyName
+		}
+		aName := strings.ToLower(a.Name)
+		bName := strings.ToLower(b.Name)
+		if aName != bName {
+			return aName < bName
+		}
+	case appconfig.CustomClaimGroupOrderOldest:
+		aCreatedAt := a.CreatedAt.ToTime()
+		bCreatedAt := b.CreatedAt.ToTime()
+		if !aCreatedAt.Equal(bCreatedAt) {
+			return aCreatedAt.Before(bCreatedAt)
+		}
+	default:
+		aCreatedAt := a.CreatedAt.ToTime()
+		bCreatedAt := b.CreatedAt.ToTime()
+		if !aCreatedAt.Equal(bCreatedAt) {
+			return aCreatedAt.After(bCreatedAt)
+		}
+	}
+
+	return a.ID < b.ID
 }
 
 // GetSuggestions returns a list of custom claim keys that have been used before
