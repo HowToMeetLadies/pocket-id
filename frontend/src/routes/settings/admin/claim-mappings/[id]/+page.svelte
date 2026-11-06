@@ -271,11 +271,6 @@
 				>{source.label}</span
 			>
 			<span class="text-caption text-fg-muted">{source.kind}</span>
-			{#if mapping.sourceType === 'custom_claim' && mapping.defaultValue}
-				<span class="text-caption text-fg-muted wrap-anywhere"
-					>{m.otherwise_value({ value: mapping.defaultValue })}</span
-				>
-			{/if}
 		</span>
 	</span>
 	<span class="flex flex-wrap gap-1">
