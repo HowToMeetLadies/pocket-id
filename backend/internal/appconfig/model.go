@@ -25,6 +25,12 @@ const (
 	EmailVerificationRequired = "required"
 )
 
+const (
+	CustomClaimGroupOrderName   = "name"
+	CustomClaimGroupOrderNewest = "date_desc"
+	CustomClaimGroupOrderOldest = "date_asc"
+)
+
 type AppConfigModel struct {
 	// General
 	AppName             AppConfigValue `json:"appName" env:"APP_NAME" public:"true"`
@@ -37,6 +43,7 @@ type AppConfigModel struct {
 
 	SignupDefaultUserGroupIDs AppConfigValue `json:"signupDefaultUserGroupIDs" env:"SIGNUP_DEFAULT_USER_GROUP_IDS"` // JSON-encoded array of strings
 	SignupDefaultCustomClaims AppConfigValue `json:"signupDefaultCustomClaims" env:"SIGNUP_DEFAULT_CUSTOM_CLAIMS"`  // JSON-encoded array of {key:string,value:string}
+	CustomClaimGroupOrder     AppConfigValue `json:"customClaimGroupOrder" env:"CUSTOM_CLAIM_GROUP_ORDER"`
 	// Email
 	RequireUserEmail                           AppConfigValue `json:"requireUserEmail" env:"REQUIRE_USER_EMAIL" type:"bool" public:"true"`
 	SmtpHost                                   AppConfigValue `json:"smtpHost" env:"SMTP_HOST"`
@@ -143,6 +150,7 @@ func getDefaultConfig() *AppConfigModel {
 		AllowUserSignups:          "disabled",
 		SignupDefaultUserGroupIDs: "[]",
 		SignupDefaultCustomClaims: "[]",
+		CustomClaimGroupOrder:     CustomClaimGroupOrderNewest,
 		Appearance:                "{}",
 		// Email
 		RequireUserEmail:           "true",

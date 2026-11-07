@@ -136,7 +136,7 @@ func initServices(
 		return nil, fmt.Errorf("failed to create session module: %w", err)
 	}
 
-	svc.customClaimService = service.NewCustomClaimService(db)
+	svc.customClaimService = service.NewCustomClaimService(db, svc.appConfigService)
 	svc.webauthnModule, err = webauthn.New(webauthn.Dependencies{
 		DB:        db,
 		Actors:    actors,

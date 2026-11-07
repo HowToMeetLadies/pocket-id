@@ -10,6 +10,7 @@ type UserGroup struct {
 	Base
 	FriendlyName       string `sortable:"case-insensitive"`
 	Name               string `sortable:"case-insensitive"`
+	ClaimPriority      int
 	LdapID             *string
 	UpdatedAt          *datatype.DateTime
 	Users              []User `gorm:"many2many:user_groups_users;"`

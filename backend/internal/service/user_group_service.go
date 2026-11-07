@@ -163,6 +163,9 @@ func (s *UserGroupService) CreateInternal(ctx context.Context, input dto.UserGro
 		FriendlyName: input.FriendlyName,
 		Name:         input.Name,
 	}
+	if input.ClaimPriority != nil {
+		group.ClaimPriority = *input.ClaimPriority
+	}
 
 	if input.LdapID != "" {
 		group.LdapID = &input.LdapID
@@ -225,6 +228,9 @@ func (s *UserGroupService) updateInternal(ctx context.Context, id string, input 
 
 	group.Name = input.Name
 	group.FriendlyName = input.FriendlyName
+	if input.ClaimPriority != nil {
+		group.ClaimPriority = *input.ClaimPriority
+	}
 	group.UpdatedAt = new(datatype.DateTime(time.Now()))
 
 	err = tx.

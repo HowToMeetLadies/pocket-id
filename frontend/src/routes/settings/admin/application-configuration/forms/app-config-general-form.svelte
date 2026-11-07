@@ -11,6 +11,7 @@
 	import { trackFormChanges } from '#lib/utils/unsaved-changes-util.svelte.ts';
 	import HouseIcon from '~icons/solar/home-2-bold-duotone';
 	import UserPenIcon from '~icons/solar/pen-new-square-bold-duotone';
+	import UsersGroupRoundedIcon from '~icons/solar/users-group-rounded-bold-duotone';
 	import { z } from 'zod/v4';
 	import OptionSelect from './option-select.svelte';
 
@@ -29,6 +30,15 @@
 		{ label: m.my_apps(), value: '/settings/apps' }
 	];
 
+	const customClaimGroupOrderOptions: {
+		label: string;
+		value: AllAppConfig['customClaimGroupOrder'];
+	}[] = [
+		{ label: m.custom_claim_group_order_name(), value: 'name' },
+		{ label: m.custom_claim_group_order_newest(), value: 'date_desc' },
+		{ label: m.custom_claim_group_order_oldest(), value: 'date_asc' }
+	];
+
 	const formSchema = z.object({
 		appName: z.string().min(2).max(30),
 		homePageUrl: z.string(),
@@ -39,7 +49,8 @@
 			.refine((minutes) => Number.isInteger(minutes), {
 				message: m.config_session_duration_whole_minutes()
 			}),
-		allowOwnAccountEdit: z.boolean()
+		allowOwnAccountEdit: z.boolean(),
+		customClaimGroupOrder: z.enum(['name', 'date_desc', 'date_asc'])
 	});
 
 	const formStore = createForm(formSchema, pickSchemaValues(formSchema, appConfig));
@@ -89,6 +100,20 @@
 		>
 			{#snippet control(props)}
 				<Switch {...props} bind:checked={$inputs.allowOwnAccountEdit.value} />
+			{/snippet}
+		</SettingRow>
+		<SettingRow
+			title={m.custom_claim_group_order()}
+			description={m.custom_claim_group_order_description()}
+			icon={UsersGroupRoundedIcon}
+		>
+			{#snippet control(props)}
+				<OptionSelect
+					{...props}
+					value={$inputs.customClaimGroupOrder.value}
+					options={customClaimGroupOrderOptions}
+					onValueChange={(v) => ($inputs.customClaimGroupOrder.value = v)}
+				/>
 			{/snippet}
 		</SettingRow>
 	</SettingsSection>
