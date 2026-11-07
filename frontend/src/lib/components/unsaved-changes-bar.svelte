@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modKey } from '#lib/utils/keyboard-util.ts';
+	import { hasOpenDialog, isEditableTarget, isModKey, modKey } from '#lib/utils/keyboard-util.ts';
 	import { beforeNavigate } from '$app/navigation';
 	import { Button } from '@pocket-id/ui/button';
 	import * as Tooltip from '@pocket-id/ui/tooltip';
@@ -139,12 +139,23 @@
 		else blocked = false;
 	});
 
-	function handleSaveShortcut(event: KeyboardEvent) {
-		if (event.key.toLowerCase() !== 's' || !(event.metaKey || event.ctrlKey)) return;
+	function handleShortcut(event: KeyboardEvent) {
+		if (!isModKey(event) || event.altKey || event.repeat) return;
 		if (!unsavedChanges.hasChanges || unsavedChanges.saving) return;
 
-		event.preventDefault();
-		void saveAll();
+		const key = event.key.toLowerCase();
+		if (key === 's' || event.key === 'Enter') {
+			event.preventDefault();
+			void saveAll();
+			return;
+		}
+
+		if (event.key === 'Backspace' && !event.shiftKey) {
+			if (isEditableTarget(event.target) || hasOpenDialog()) return;
+
+			event.preventDefault();
+			unsavedChanges.discardAll();
+		}
 	}
 
 	async function saveAll() {
@@ -179,7 +190,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleSaveShortcut} />
+<svelte:window onkeydown={handleShortcut} />
 
 <p class="sr-only" aria-live="polite">{announcement}</p>
 
@@ -269,16 +280,29 @@
 				style:right="{INSET_BUTTONS}px"
 				inert={!showingActions}
 			>
-				<Button
-					variant="ghost"
-					size="sm"
-					class="text-inverse-fg before:bg-inverse-hover focus-visible:outline-inverse-fg"
-					disabled={unsavedChanges.saving}
-					onclick={() => unsavedChanges.discardAll()}
-				>
-					{m.discard()}
-				</Button>
 				<!-- The bar lives outside the settings shell's tooltip provider -->
+				<Tooltip.Provider>
+					<Tooltip.Root>
+						<Tooltip.Trigger>
+							{#snippet child({ props })}
+								<Button
+									{...props}
+									variant="ghost"
+									size="sm"
+									class="text-inverse-fg before:bg-inverse-hover focus-visible:outline-inverse-fg"
+									disabled={unsavedChanges.saving}
+									onclick={() => unsavedChanges.discardAll()}
+								>
+									{m.discard()}
+								</Button>
+							{/snippet}
+						</Tooltip.Trigger>
+						<Tooltip.Content>
+							{m.discard()}
+							<kbd class="text-inverse-muted font-sans">{modKey}⌫</kbd>
+						</Tooltip.Content>
+					</Tooltip.Root>
+				</Tooltip.Provider>
 				<Tooltip.Provider>
 					<Tooltip.Root>
 						<Tooltip.Trigger>
@@ -296,7 +320,11 @@
 						</Tooltip.Trigger>
 						<Tooltip.Content>
 							{m.save()}
-							<kbd class="text-inverse-muted font-sans">{modKey}S</kbd>
+							<span class="ml-1 inline-flex items-center gap-1">
+								<kbd class="text-inverse-muted font-sans">{modKey}S</kbd>
+								<span class="text-inverse-muted" aria-hidden="true">/</span>
+								<kbd class="text-inverse-muted font-sans">{modKey}↵</kbd>
+							</span>
 						</Tooltip.Content>
 					</Tooltip.Root>
 				</Tooltip.Provider>

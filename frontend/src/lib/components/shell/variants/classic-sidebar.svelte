@@ -6,7 +6,7 @@
 	import appConfigStore from '#lib/stores/application-configuration-store.ts';
 	import { commandPalette } from '#lib/stores/command-palette-store.svelte.ts';
 	import type { AppVersionInformation } from '#lib/types/application-configuration.type.ts';
-	import { modKey } from '#lib/utils/keyboard-util.ts';
+	import { hasOpenDialog, isEditableTarget, isModKey, modKey } from '#lib/utils/keyboard-util.ts';
 	import { cn } from '@pocket-id/ui/utils';
 	import PanelLeftCloseIcon from '~icons/solar/panel-left-close-linear';
 	import PanelLeftOpenIcon from '~icons/solar/panel-left-open-linear';
@@ -30,6 +30,16 @@
 	} = $props();
 
 	const current = $derived(activeHref(groups, page.url.pathname));
+
+	function handleSidebarShortcut(event: KeyboardEvent) {
+		if (!isModKey(event) || event.altKey || event.shiftKey || event.repeat) return;
+		if (event.key.toLowerCase() !== 'b') return;
+		if (!window.matchMedia('(min-width: 1024px)').matches) return;
+		if (isEditableTarget(event.target) || hasOpenDialog()) return;
+
+		event.preventDefault();
+		collapsed = !collapsed;
+	}
 
 	const versionLabel = $derived(`Pocket ID ${versionInformation.currentVersion}`);
 
@@ -69,6 +79,8 @@
 		return () => observer.disconnect();
 	});
 </script>
+
+<svelte:window onkeydown={handleSidebarShortcut} />
 
 <aside
 	data-slot="app-sidebar"
@@ -297,6 +309,7 @@
 				</Tooltip.Trigger>
 				<Tooltip.Content side="right">
 					{collapsed ? m.expand_sidebar() : m.collapse_sidebar()}
+					<span class="text-inverse-muted">{modKey}B</span>
 				</Tooltip.Content>
 			</Tooltip.Root>
 		</div>
