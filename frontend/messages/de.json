@@ -953,7 +953,7 @@
 	"group_name_placeholder": "Fotografen",
 	"group_removed_from_client": "{group} wurde aus {client} entfernt",
 	"group_sections": "Gruppenabschnitte",
-	"groups_page_description": "Gruppen legen fest, wer sich bei welcher Anwendung anmelden kann, und fügen den Tokens Merkmale hinzu.",
+	"groups_page_description": "Gruppen legen fest, wer sich bei welcher Anwendung anmelden kann, und reichen zusätzliche Merkmale an die Anwendung weiter.",
 	"identifiers": "Identifikatoren",
 	"loading": "Laden…",
 	"members": "Mitglieder",
