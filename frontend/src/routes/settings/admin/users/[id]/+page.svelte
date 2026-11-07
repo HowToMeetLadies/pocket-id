@@ -53,11 +53,6 @@
 	const isMe = $derived(user.id === $userStore?.id);
 	const readOnly = $derived(!!user.ldapId && $appConfigStore.ldapEnabled);
 	const firstName = $derived(user.firstName || user.displayName);
-	const userDisplayName = $derived(
-		user.displayName?.trim() ||
-			[user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
-			user.username
-	);
 
 	trackUnsavedValue(
 		() => user.customClaims,
@@ -101,7 +96,7 @@
 </script>
 
 <svelte:head>
-	<title>{userDisplayName}</title>
+	<title>{user.displayName}</title>
 </svelte:head>
 
 {#snippet GroupRow(group: UserGroupMinimal)}
@@ -118,7 +113,7 @@
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title={userDisplayName}
+		title={user.displayName}
 		breadcrumbLabel={user.username}
 		breadcrumbs={[
 			{ label: m.administration() },
