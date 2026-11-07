@@ -91,9 +91,32 @@
 				{$appConfigStore.appName}
 			</span>
 		</a>
+
+		<Tooltip.Root>
+			<Tooltip.Trigger>
+				{#snippet child({ props })}
+					<button
+						{...props}
+						type="button"
+						aria-label={m.search_or_jump_to()}
+						aria-haspopup="dialog"
+						onclick={() => (commandPalette.open = true)}
+						class={cn(
+							'text-fg-muted hover:bg-fill-hover hover:text-fg focus-visible:outline-ring ml-auto hidden size-9 shrink-0 items-center justify-center rounded-sm outline-offset-[-2px] transition-colors focus-visible:outline-2',
+							!collapsed && 'lg:flex'
+						)}
+					>
+						<Search class="size-4 shrink-0" />
+					</button>
+				{/snippet}
+			</Tooltip.Trigger>
+			<Tooltip.Content side="bottom">
+				{m.search_or_jump_to()}<span class="text-inverse-muted">{modKey}K</span>
+			</Tooltip.Content>
+		</Tooltip.Root>
 	</div>
 
-	<!-- A field-like trigger in the sidebar, a search icon in the rail -->
+	<!-- The rail has no room beside the logo, so its search trigger stays below it -->
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			{#snippet child({ props })}
@@ -104,26 +127,15 @@
 					aria-haspopup="dialog"
 					onclick={() => (commandPalette.open = true)}
 					class={cn(
-						'text-fg-muted focus-visible:outline-ring mt-3 flex h-9 shrink-0 items-center gap-2 rounded-sm outline-offset-[-2px] transition-colors focus-visible:outline-2',
-						collapsed
-							? 'hover:bg-fill-hover hover:text-fg w-9 justify-center'
-							: 'hover:bg-fill-hover hover:text-fg lg:bg-fill-muted lg:hover:bg-fill-hover w-9 justify-center lg:w-full lg:justify-start lg:px-3'
+						'text-fg-muted hover:bg-fill-hover hover:text-fg focus-visible:outline-ring mt-3 flex size-9 shrink-0 items-center justify-center rounded-sm outline-offset-[-2px] transition-colors focus-visible:outline-2',
+						collapsed ? 'lg:flex' : 'lg:hidden'
 					)}
 				>
 					<Search class="size-4 shrink-0" />
-					<span
-						class={cn(
-							'text-control flex-1 truncate text-left',
-							collapsed ? 'hidden' : 'hidden lg:inline'
-						)}>{m.search_or_jump_to()}</span
-					>
-					<span class={cn('gap-0.5', collapsed ? 'hidden' : 'hidden lg:flex')} aria-hidden="true">
-						<kbd class="keycap">{modKey.replace('+', '')}</kbd><kbd class="keycap">K</kbd>
-					</span>
 				</button>
 			{/snippet}
 		</Tooltip.Trigger>
-		<Tooltip.Content side="right" class={cn(!collapsed && 'lg:hidden')}>
+		<Tooltip.Content side="right">
 			{m.search_or_jump_to()}<span class="text-inverse-muted">{modKey}K</span>
 		</Tooltip.Content>
 	</Tooltip.Root>
