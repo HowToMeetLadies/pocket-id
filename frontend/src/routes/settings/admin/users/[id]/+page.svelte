@@ -119,6 +119,7 @@
 <div class="flex flex-col gap-8">
 	<PageHeader
 		title={userDisplayName}
+		breadcrumbLabel={user.username}
 		breadcrumbs={[
 			{ label: m.administration() },
 			{ label: m.users(), href: '/settings/admin/users' }
