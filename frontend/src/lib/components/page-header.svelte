@@ -12,6 +12,7 @@
 		title,
 		description,
 		breadcrumbs,
+		breadcrumbLabel,
 		identity,
 		status,
 		tags,
@@ -22,6 +23,8 @@
 		description?: string | Snippet;
 		// The ancestors of a detail page; passing them turns the header into a detail header with the title as the current item
 		breadcrumbs?: Crumb[];
+		// Overrides the current breadcrumb item when the page title is not the path name
+		breadcrumbLabel?: string;
 		identity?: Snippet;
 		status?: Snippet;
 		tags?: Snippet;
@@ -59,7 +62,7 @@
 							<ChevronRightIcon class="size-3" />
 						</li>
 					{/each}
-					<li><span aria-current="page" class="text-fg">{title}</span></li>
+					<li><span aria-current="page" class="text-fg">{breadcrumbLabel ?? title}</span></li>
 				</ol>
 				{#if backCrumb}
 					<a

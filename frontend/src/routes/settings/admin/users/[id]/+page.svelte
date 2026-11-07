@@ -96,7 +96,7 @@
 </script>
 
 <svelte:head>
-	<title>{user.displayName}</title>
+	<title>{user.username}</title>
 </svelte:head>
 
 {#snippet GroupRow(group: UserGroupMinimal)}
@@ -114,6 +114,7 @@
 <div class="flex flex-col gap-8">
 	<PageHeader
 		title={user.displayName}
+		breadcrumbLabel={user.username}
 		breadcrumbs={[
 			{ label: m.administration() },
 			{ label: m.users(), href: '/settings/admin/users' }
