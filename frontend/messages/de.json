@@ -1048,7 +1048,7 @@
 	"new_browser_hint": "Erste Anmeldung über diesen Browser",
 	"page_not_found_title": "Seite nicht gefunden",
 	"claim_mappings": "Zuordnungen",
-	"claim_mappings_page_description": "Regeln legen fest, welche Merkmale Anwendungen in ihren Tokens und über den Benutzerinfo-Endpunkt erhalten. Anwendungen ohne eigene Regel verwenden die Standardregel.",
+	"claim_mappings_page_description": "Regeln legen fest, welche Merkmale an die jeweilige Anwendung übermittelt werden; ohne Zuordnung greift der Standard. Eine Vorgabe kann mehreren Anwendungen zugewiesen werden, aber jeder Anwendung höchstens eine.",
 	"add_policy": "Regel hinzufügen",
 	"policy": "Regel",
 	"policy_sections": "Bereiche der Regel",
