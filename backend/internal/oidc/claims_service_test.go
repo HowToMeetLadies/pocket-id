@@ -134,7 +134,7 @@ type fakeCustomClaimSource struct {
 	claims []model.CustomClaim
 }
 
-func (f fakeCustomClaimSource) GetCustomClaimsForUserWithUserGroups(_ context.Context, _ string, _ *gorm.DB) ([]model.CustomClaim, error) {
+func (f fakeCustomClaimSource) GetCustomClaimsForUserWithUserGroupsWithOrder(_ context.Context, _ string, _ *gorm.DB, _ string) ([]model.CustomClaim, error) {
 	return f.claims, nil
 }
 

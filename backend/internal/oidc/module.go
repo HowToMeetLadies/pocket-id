@@ -40,7 +40,7 @@ type Signer interface {
 }
 
 type CustomClaimSource interface {
-	GetCustomClaimsForUserWithUserGroups(ctx context.Context, userID string, tx *gorm.DB) ([]model.CustomClaim, error)
+	GetCustomClaimsForUserWithUserGroupsWithOrder(ctx context.Context, userID string, tx *gorm.DB, order string) ([]model.CustomClaim, error)
 }
 
 type ReauthenticationTokenConsumer interface {

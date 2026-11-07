@@ -24,6 +24,7 @@ export type AllAppConfig = AppConfig & {
 	emailsVerified: boolean;
 	signupDefaultUserGroupIDs: string[];
 	signupDefaultCustomClaims: CustomClaim[];
+	customClaimGroupOrder: 'name' | 'date_desc' | 'date_asc';
 	// Email
 	smtpHost: string;
 	smtpPort: string;

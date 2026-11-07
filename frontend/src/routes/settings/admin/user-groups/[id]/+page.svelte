@@ -68,7 +68,8 @@
 
 	const formStore = createForm(groupNameSchema, {
 		friendlyName: group.friendlyName,
-		name: group.name
+		name: group.name,
+		claimPriority: group.claimPriority
 	});
 	const { inputs } = formStore;
 	trackFormChanges(
@@ -77,6 +78,7 @@
 			const saved = await userGroupService.update(group.id, values);
 			group.friendlyName = saved.friendlyName;
 			group.name = saved.name;
+			group.claimPriority = saved.claimPriority;
 		}
 	);
 
@@ -292,6 +294,13 @@
 						description={readOnly ? undefined : m.group_name_change_helper()}
 						inputClass="font-mono"
 						bind:input={$inputs.name}
+						readonly={readOnly}
+					/>
+					<FormInput
+						label={m.claim_priority()}
+						description={readOnly ? undefined : m.claim_priority_description()}
+						type="number"
+						bind:input={$inputs.claimPriority}
 						readonly={readOnly}
 					/>
 				</div>
