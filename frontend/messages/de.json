@@ -1039,7 +1039,7 @@
 	"date": "Zeitraum",
 	"last_24_hours": "Letzte 24 Stunden",
 	"last_n_days": "Letzte {count} Tage",
-	"custom_range": "Benutzerdefiniertes Sortiment",
+	"custom_range": "Nach Datum",
 	"date_from": "Von",
 	"date_to": "Zu",
 	"apply": "Übernehmen",
