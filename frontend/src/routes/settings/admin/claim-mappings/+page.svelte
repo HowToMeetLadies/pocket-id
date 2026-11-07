@@ -104,7 +104,11 @@
 {/snippet}
 
 <div class="flex flex-col">
-	<PageHeader title={m.claim_mappings()} description={m.claim_mappings_page_description()}>
+	<PageHeader
+		title={m.claim_mappings()}
+		description={m.claim_mappings_page_description()}
+		stackActionsOnMobile={true}
+	>
 		{#snippet actions()}
 			<Button onclick={() => (createOpen = true)}>
 				<PlusIcon />
@@ -113,7 +117,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<div class="mt-10">
+	<div class="mt-6 sm:mt-10">
 		<AdvancedTable
 			id="claim-mapping-policy-list"
 			bind:this={tableRef}
