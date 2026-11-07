@@ -400,6 +400,7 @@ func (s *ClaimsService) applyUserClaims(claims map[string]any, user model.User, 
 
 	case claimmappingpolicy.MappingSourceCustomClaim:
 		// Map from custom claim
+		matched := false
 		for _, customClaim := range customClaims {
 			if mapping.SourceValue == "*" || customClaim.Key == mapping.SourceValue {
 				claimName := mapping.ClaimName
@@ -407,10 +408,17 @@ func (s *ClaimsService) applyUserClaims(claims map[string]any, user model.User, 
 					claimName = customClaim.Key
 				}
 				claims[claimName] = parseCustomClaimValue(customClaim.Value)
+				matched = true
 				if mapping.SourceValue != "*" {
 					break
 				}
 			}
+		}
+
+		// A default value keeps the claim present for users who have no such custom claim themselves or through a group
+		// A wildcard mapping has no single target key, so it never gets one
+		if !matched && mapping.DefaultValue != "" && mapping.SourceValue != "*" {
+			claims[mapping.ClaimName] = parseCustomClaimValue(mapping.DefaultValue)
 		}
 
 	case claimmappingpolicy.MappingSourceStatic:
