@@ -117,7 +117,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<div class="mt-6 sm:mt-10">
+	<div class="mt-10">
 		<AdvancedTable
 			id="claim-mapping-policy-list"
 			bind:this={tableRef}
