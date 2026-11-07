@@ -1102,7 +1102,7 @@
 	"each_custom_claims_own_key": "Eigener Schlüssel je Merkmal",
 	"every_custom_claim": "Jedes eigene Merkmal",
 	"user_field": "Benutzerfeld",
-	"custom_claim": "Eigenes Merkmal",
+	"custom_claim": "Merkmal",
 	"fixed_value": "Fester Wert",
 	"full_name": "Vollständiger Name",
 	"email_verified": "E-Mail geprüft",
