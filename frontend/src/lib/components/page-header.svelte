@@ -17,7 +17,8 @@
 		status,
 		tags,
 		actions,
-		facts
+		facts,
+		stackActionsOnMobile = false
 	}: {
 		title: string;
 		description?: string | Snippet;
@@ -31,6 +32,8 @@
 		actions?: Snippet;
 		// Read-only facts that turn a detail header into the sunken identity hero
 		facts?: FactBand[];
+		// Stack the actions below the copy on phones so the description can use the full width
+		stackActionsOnMobile?: boolean;
 	} = $props();
 
 	const backCrumb = $derived(breadcrumbs?.findLast((crumb) => crumb.href));
@@ -139,7 +142,12 @@
 	</header>
 {:else}
 	<!-- Actions that leave the title too little room wrap under it instead of squeezing it -->
-	<header class="flex flex-wrap items-start gap-4">
+	<header
+		class={cn(
+			'flex flex-wrap items-start gap-4',
+			stackActionsOnMobile && 'max-sm:flex-col max-sm:items-stretch max-sm:gap-3'
+		)}
+	>
 		<div class="flex min-w-40 flex-1 flex-col gap-2">
 			{@render h1()}
 			{#if description}
@@ -149,7 +157,10 @@
 		{#if actions}
 			<!-- The primary action stays on the title row and drops to the small button size on phones -->
 			<div
-				class="flex shrink-0 items-center gap-2 max-sm:*:data-[slot=button]:h-(--h-sm) max-sm:*:data-[slot=button]:px-3"
+				class={cn(
+					'flex shrink-0 items-center gap-2 max-sm:*:data-[slot=button]:h-(--h-sm) max-sm:*:data-[slot=button]:px-3',
+					stackActionsOnMobile && 'max-sm:w-full max-sm:justify-end'
+				)}
 			>
 				{@render actions()}
 			</div>

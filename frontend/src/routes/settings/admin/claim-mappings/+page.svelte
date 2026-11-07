@@ -104,7 +104,11 @@
 {/snippet}
 
 <div class="flex flex-col">
-	<PageHeader title={m.claim_mappings()} description={m.claim_mappings_page_description()}>
+	<PageHeader
+		title={m.claim_mappings()}
+		description={m.claim_mappings_page_description()}
+		stackActionsOnMobile={true}
+	>
 		{#snippet actions()}
 			<Button onclick={() => (createOpen = true)}>
 				<PlusIcon />
