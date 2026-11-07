@@ -562,6 +562,62 @@ func TestValidateClaimMappingsWithoutTarget(t *testing.T) {
 	assert.Contains(t, err.Error(), "must target at least one")
 }
 
+func TestValidateClaimMappingsCustomClaimDefaultValue(t *testing.T) {
+	require.NoError(t, ValidateClaimMappings([]OidcClaimMappingDto{
+		{
+			ClaimName:    "department",
+			SourceType:   "custom_claim",
+			SourceValue:  "department",
+			DefaultValue: "unassigned",
+			IDToken:      true,
+		},
+	}))
+
+	tests := map[string]struct {
+		mapping OidcClaimMappingDto
+		want    string
+	}{
+		"every custom claim": {
+			mapping: OidcClaimMappingDto{
+				ClaimName:    "*",
+				SourceType:   "custom_claim",
+				SourceValue:  "*",
+				DefaultValue: "unassigned",
+				IDToken:      true,
+			},
+			want: "can't set a default value",
+		},
+		"user field": {
+			mapping: OidcClaimMappingDto{
+				ClaimName:    "mail",
+				SourceType:   "user_field",
+				SourceValue:  string(UserFieldEmail),
+				DefaultValue: "unassigned",
+				IDToken:      true,
+			},
+			want: "only set a default value for a custom claim",
+		},
+		"fixed value": {
+			mapping: OidcClaimMappingDto{
+				ClaimName:    "tenant",
+				SourceType:   "static",
+				SourceValue:  "acme",
+				DefaultValue: "unassigned",
+				IDToken:      true,
+			},
+			want: "only set a default value for a custom claim",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := ValidateClaimMappings([]OidcClaimMappingDto{tt.mapping})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.want)
+		})
+	}
+}
+
 func TestValidateClaimMappingsValidUserFields(t *testing.T) {
 	validFields := []OidcUserField{
 		UserFieldID,
