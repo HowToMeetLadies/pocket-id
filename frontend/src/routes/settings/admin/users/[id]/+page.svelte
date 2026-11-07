@@ -96,7 +96,7 @@
 </script>
 
 <svelte:head>
-	<title>{user.displayName}</title>
+	<title>{user.username}</title>
 </svelte:head>
 
 {#snippet GroupRow(group: UserGroupMinimal)}
