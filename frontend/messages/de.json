@@ -1242,5 +1242,8 @@
 	"config_set_by_env": "Durch eine Umgebungsvariable festgelegt",
 	"config_set_by_env_description": "Ändern Sie sie in Ihrer Umgebung und starten Sie Pocket ID neu.",
 	"auth_login_code_description": "Geben Sie den Code aus Ihrer E-Mail oder von Ihrem Administrator ein.",
-	"otherwise_value": "Andernfalls: {value}"
+	"otherwise_value": "Andernfalls: {value}",
+	"sign_in_again_title": "Du wurdest abgemeldet",
+	"sign_in_again_description": "Melde dich erneut an, um dort weiterzumachen, wo du aufgehört hast.",
+	"sign_in_again_picking_up": "Es geht dort weiter, wo du aufgehört hast…"
 }
